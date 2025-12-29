@@ -3,8 +3,10 @@ import re
 import requests
 import aiohttp
 from typing import AsyncIterator, List, Dict, Any
+from pathlib import Path
 from loguru import logger
 from .openai_compatible_llm import AsyncLLM
+from ...utils.model_downloader import ensure_ollama_model_registered
 
 
 class OllamaLLM(AsyncLLM):
@@ -23,6 +25,20 @@ class OllamaLLM(AsyncLLM):
         self.keep_alive = keep_alive
         self.unload_at_exit = unload_at_exit
         self.cleaned = False
+        
+        # Auto-download snow_white model if needed
+        if model == "snow_white":
+            try:
+                project_root = Path(__file__).parent.parent.parent.parent
+                model_dir = project_root / "fairy_tale" / "models" / "snow_white_gguf"
+                ensure_ollama_model_registered(model_name="snow_white", model_dir=model_dir)
+            except Exception as e:
+                logger.warning(
+                    f"Failed to auto-download snow_white model: {e}. "
+                    "Please download it manually from HuggingFace: "
+                    "https://huggingface.co/PJiNH/snow_white_gguf"
+                )
+        
         super().__init__(
             model=model,
             base_url=base_url,
