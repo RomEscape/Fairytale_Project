@@ -32,17 +32,21 @@ pip install -r requirements.txt
 uv sync
 ```
 
-### 3. HuggingFace에서 모델 다운로드 및 Ollama 등록
-
-**모델은 HuggingFace에서 자동으로 다운로드됩니다:**
+### 3. Ollama 설치 및 모델 준비
 
 ```bash
 # Ollama 설치 (아직 설치하지 않은 경우)
 curl -fsSL https://ollama.com/install.sh | sh
 
-# HuggingFace CLI 설치 (아직 설치하지 않은 경우)
+# HuggingFace CLI 설치 (자동 다운로드를 위해 필요)
 pip install huggingface-hub
+```
 
+**모델 자동 다운로드**: `snow_white` 모델을 사용할 때 모델이 없으면 자동으로 HuggingFace에서 다운로드됩니다.
+
+**수동 다운로드 (선택사항)**:
+
+```bash
 # 모델 디렉토리 생성
 mkdir -p fairy_tale/models/snow_white_gguf
 cd fairy_tale/models/snow_white_gguf
