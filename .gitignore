@@ -60,6 +60,7 @@ models/piper_voice/*
 # Fairy tale models - include final models, exclude backups and large intermediate files
 fairy_tale/models/*_backup*/
 fairy_tale/models/*/model-f16.gguf
+fairy_tale/models/*/model-q4_0.gguf  # GGUF 모델은 HuggingFace에서 다운로드
 fairy_tale/checkpoints/*_backup*/
 fairy_tale/wandb/
 fairy_tale/training*.log

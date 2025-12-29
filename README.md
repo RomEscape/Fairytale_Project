@@ -32,14 +32,33 @@ pip install -r requirements.txt
 uv sync
 ```
 
-### 3. Ollama 설치 및 모델 등록
+### 3. HuggingFace에서 모델 다운로드 및 Ollama 등록
 
 ```bash
 # Ollama 설치 (아직 설치하지 않은 경우)
 curl -fsSL https://ollama.com/install.sh | sh
 
-# 모델 디렉토리로 이동
+# HuggingFace CLI 설치 (아직 설치하지 않은 경우)
+pip install huggingface-hub
+
+# 모델 디렉토리 생성
+mkdir -p fairy_tale/models/snow_white_gguf
 cd fairy_tale/models/snow_white_gguf
+
+# HuggingFace에서 모델 다운로드
+huggingface-cli download PJiNH/snow_white_gguf model-q4_0.gguf --local-dir .
+
+# Modelfile 생성
+cat > Modelfile << 'EOF'
+FROM model-q4_0.gguf
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.95
+PARAMETER top_k 40
+PARAMETER num_predict 200
+PARAMETER repeat_penalty 1.1
+PARAMETER repeat_last_n 64
+EOF
 
 # Ollama에 모델 등록
 ollama rm snow_white 2>/dev/null || true
@@ -48,6 +67,8 @@ ollama create snow_white -f Modelfile
 # 모델 등록 확인
 ollama list | grep snow_white
 ```
+
+**참고**: 모델은 [HuggingFace](https://huggingface.co/PJiNH/snow_white_gguf)에서 직접 다운로드됩니다 (2.37 GB).
 
 ### 4. VTuber 설정 및 서버 실행
 
@@ -72,7 +93,8 @@ python run_server.py
 
 - **베이스 모델**: Qwen/Qwen3-4B-Instruct-2507 (HuggingFace)
 - **데이터 생성 모델**: exaone3.5:7.8b (Ollama, 한국어 특화)
-- **Fine-tuning 모델**: snow_white (Ollama에 등록된 Fine-tuning 모델)
+- **Fine-tuning 모델**: [PJiNH/snow_white_gguf](https://huggingface.co/PJiNH/snow_white_gguf) (HuggingFace, GGUF Q4_0 양자화, 2.37 GB)
+  - Ollama에 등록하여 `snow_white`로 사용
 
 ## 워크플로우
 
@@ -186,20 +208,45 @@ python scripts/merge_and_export_ollama.py \
 
 **출력**: `fairy_tale/models/snow_white/`
 
-### 9단계: GGUF 변환 및 Ollama 등록
+### 9단계: HuggingFace에서 모델 다운로드 및 Ollama 등록
 
-**주의**: Qwen3 모델은 GGUF 변환이 필수입니다.
+**이미 학습된 모델을 사용하는 경우 (권장)**:
 
 ```bash
-# 상태 확인
-ollama list | grep snow_white
+# HuggingFace CLI 설치 (아직 설치하지 않은 경우)
+pip install huggingface-hub
 
-# 이미 등록되어 있으면 10단계로 진행
+# 모델 디렉토리 생성
+mkdir -p fairy_tale/models/snow_white_gguf
+cd fairy_tale/models/snow_white_gguf
+
+# HuggingFace에서 모델 다운로드
+huggingface-cli download PJiNH/snow_white_gguf model-q4_0.gguf --local-dir .
+
+# Modelfile 생성
+cat > Modelfile << 'EOF'
+FROM model-q4_0.gguf
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.95
+PARAMETER top_k 40
+PARAMETER num_predict 200
+PARAMETER repeat_penalty 1.1
+PARAMETER repeat_last_n 64
+EOF
+
+# Ollama에 모델 등록
+ollama rm snow_white 2>/dev/null || true
+ollama create snow_white -f Modelfile
+
+# 모델 등록 확인
+ollama list | grep snow_white
 ```
 
-**아직 완료하지 않은 경우**:
+**직접 학습한 모델을 GGUF로 변환하는 경우**:
 
 ```bash
+# GGUF 변환 (Qwen3 모델은 GGUF 변환이 필수)
 # 1. llama.cpp 설치 (한 번만)
 [ ! -d "llama.cpp" ] && git clone https://github.com/ggerganov/llama.cpp.git
 cd llama.cpp
@@ -233,7 +280,7 @@ FROM model-q4_0.gguf
 PARAMETER temperature 0.7
 PARAMETER top_p 0.95
 PARAMETER top_k 40
-PARAMETER num_predict 300
+PARAMETER num_predict 200
 PARAMETER repeat_penalty 1.1
 PARAMETER repeat_last_n 64
 EOF
@@ -241,6 +288,8 @@ EOF
 ollama rm snow_white 2>/dev/null || true
 ollama create snow_white -f Modelfile
 ```
+
+**참고**: 학습된 모델은 [HuggingFace](https://huggingface.co/PJiNH/snow_white_gguf)에서 다운로드할 수 있습니다.
 
 ### 10단계: VTuber 설정
 
@@ -270,7 +319,7 @@ python run_server.py
 |------|------|------|
 | 데이터 생성 | `exaone3.5:7.8b` | Ollama, 한국어 특화 (권장) |
 | Fine-tuning | `Qwen/Qwen3-4B-Instruct-2507` | HuggingFace |
-| 추론 | `snow_white` | Ollama에 등록된 Fine-tuning 모델 |
+| 추론 | `PJiNH/snow_white_gguf` | HuggingFace에서 다운로드, Ollama에 `snow_white`로 등록 |
 
 ## 디렉토리 구조
 
