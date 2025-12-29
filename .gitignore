@@ -56,6 +56,10 @@ asset
 models/*
 !models/piper_voice
 models/piper_voice/*
+# 큰 모델 파일 제외 (HuggingFace나 별도 다운로드 필요)
+models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/*.onnx
+models/**/*.onnx
+!models/**/silero_vad.onnx
 
 # Fairy tale models - include final models, exclude backups and large intermediate files
 fairy_tale/models/*_backup*/
