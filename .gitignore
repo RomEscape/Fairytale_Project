@@ -1,0 +1,92 @@
+# ignore the user configuration file
+conf.yaml
+
+# ignore non-default background images
+/backgrounds/*
+!/backgrounds/README.md
+
+# ignore non-default live2d models
+/live2d-models/*
+!/live2d-models/mao_pro
+!/live2d-models/shizuku
+
+# ignore non-default character configs
+/characters/*
+!/characters/README.md
+!/characters/snow_white.yaml
+# but all of the defaults are already tracked, so no need to un-ignore them
+
+# ignore avatars
+avatars/*
+
+# macOS system files
+.DS_Store
+
+# Python files
+__pycache__/
+*.pyc
+lab.py
+.idea
+
+# Virtual environment
+.venv
+.conda
+conda
+
+# Sensitive data
+.env
+api_keys.py
+src/open_llm_vtuber/llm/user_credentials.json
+
+# Database files
+memory.db
+memory.db.bk
+
+# Logs
+server.log
+logs/*
+
+# Cache and models
+cache/*
+src/open_llm_vtuber/tts/asset
+src/open_llm_vtuber/tts/config
+src/open_llm_vtuber/asr/models*
+!src/open_llm_vtuber/asr/models/silero_vad.onnx
+asset
+models/*
+!models/piper_voice
+models/piper_voice/*
+
+# Fairy tale models - exclude large model files (over 2GB GitHub LFS limit)
+# Model files should be downloaded separately or hosted externally
+fairy_tale/models/**/*.gguf
+fairy_tale/models/*_backup*/
+fairy_tale/models/*/model-f16.gguf
+fairy_tale/checkpoints/*_backup*/
+fairy_tale/wandb/
+fairy_tale/training*.log
+fairy_tale/*.pid
+fairy_tale/result/
+fairy_tale/processed/
+llama.cpp/
+
+
+# Legacy and specific directories
+legacy/
+chat_history/
+knowledge_base/
+submodules/MeloTTS
+openapi_assistants.json
+openapi_memgpt.json
+
+# memory log
+mem.json
+config/conf.yaml.backup
+
+*.exe
+
+tmp/
+private/
+config/mcp_servers.json
+
+.vscode/

@@ -1,0 +1,7 @@
+# Git LFS 설정 - 큰 모델 파일들
+fairy_tale/models/**/*.gguf filter=lfs diff=lfs merge=lfs -text
+fairy_tale/models/**/*.safetensors filter=lfs diff=lfs merge=lfs -text
+fairy_tale/checkpoints/**/*.safetensors filter=lfs diff=lfs merge=lfs -text
+fairy_tale/checkpoints/**/*.bin filter=lfs diff=lfs merge=lfs -text
+fairy_tale/checkpoints/**/*.pt filter=lfs diff=lfs merge=lfs -text
+fairy_tale/checkpoints/**/*.pth filter=lfs diff=lfs merge=lfs -text
