@@ -30,6 +30,7 @@ class AsyncLLM(StatelessLLMInterface):
         organization_id: str = "z",
         project_id: str = "z",
         temperature: float = 1.0,
+        max_tokens: int | None = None,
     ):
         """
         Initializes an instance of the `AsyncLLM` class.
@@ -41,10 +42,12 @@ class AsyncLLM(StatelessLLMInterface):
         - project_id (str, optional): The project ID for the OpenAI API. Defaults to "z".
         - llm_api_key (str, optional): The API key for the OpenAI API. Defaults to "z".
         - temperature (float, optional): What sampling temperature to use, between 0 and 2. Defaults to 1.0.
+        - max_tokens (int, optional): Maximum number of tokens to generate. Defaults to None.
         """
         self.base_url = base_url
         self.model = model
         self.temperature = temperature
+        self.max_tokens = max_tokens
         self.client = AsyncOpenAI(
             base_url=base_url,
             organization=organization_id,
@@ -84,6 +87,12 @@ class AsyncLLM(StatelessLLMInterface):
         # Tool call related state variables
         accumulated_tool_calls = {}
         in_tool_call = False
+        # Accumulate text for sentence completion check
+        accumulated_text = ""
+        # Korean honorific endings for sentence completion
+        HONORIFIC_ENDINGS = ["어요", "아요", "해요", "예요", "세요", "습니다", "네요", "죠", "까요", "나요", "가요", "지요"]
+        # Minimum characters before checking for early stop
+        MIN_CHARS_FOR_EARLY_STOP = 20
 
         try:
             # If system prompt is provided, add it to the messages
@@ -97,15 +106,37 @@ class AsyncLLM(StatelessLLMInterface):
 
             available_tools = tools if self.support_tools else NOT_GIVEN
 
+            # Prepare extra_body for Ollama (num_predict and stop sequences)
+            extra_body = None
+            if "ollama" in self.base_url.lower():
+                ollama_options = {}
+                if self.max_tokens is not None:
+                    ollama_options["num_predict"] = self.max_tokens
+                # Add stop sequences to prevent long responses
+                ollama_options["stop"] = ["<|eot|>", "\n\n\n", "사용자:", "User:"]
+                extra_body = {"options": ollama_options}
+            
+            create_params = {
+                "messages": messages_with_system,
+                "model": self.model,
+                "stream": True,
+                "temperature": self.temperature,
+                "tools": available_tools,
+            }
+            
+            # Add max_tokens for OpenAI-compatible APIs
+            if self.max_tokens is not None and not extra_body:
+                create_params["max_tokens"] = self.max_tokens
+                # Add stop sequences for OpenAI-compatible APIs
+                create_params["stop"] = ["<|eot|>", "\n\n\n", "사용자:", "User:"]
+            
+            # Add extra_body for Ollama
+            if extra_body:
+                create_params["extra_body"] = extra_body
+
             stream: AsyncStream[
                 ChatCompletionChunk
-            ] = await self.client.chat.completions.create(
-                messages=messages_with_system,
-                model=self.model,
-                stream=True,
-                temperature=self.temperature,
-                tools=available_tools,
-            )
+            ] = await self.client.chat.completions.create(**create_params)
             logger.debug(
                 f"Tool Support: {self.support_tools}, Available tools: {available_tools}"
             )
@@ -185,9 +216,47 @@ class AsyncLLM(StatelessLLMInterface):
                 if len(chunk.choices) == 0:
                     logger.info("Empty chunk received")
                     continue
-                elif chunk.choices[0].delta.content is None:
-                    chunk.choices[0].delta.content = ""
-                yield chunk.choices[0].delta.content
+                
+                # Get content from chunk, default to empty string if None
+                content = chunk.choices[0].delta.content if chunk.choices[0].delta.content is not None else ""
+                
+                if content:
+                    accumulated_text += content
+                    
+                    # Check for stop sequences in accumulated text
+                    should_stop = False
+                    for stop_seq in ["<|eot|>", "\n\n\n", "사용자:", "User:"]:
+                        if stop_seq in accumulated_text:
+                            logger.debug(f"Stop sequence '{stop_seq}' detected in accumulated text, stopping generation")
+                            # Remove stop sequence from the accumulated text
+                            accumulated_text = accumulated_text.split(stop_seq)[0]
+                            # If stop sequence is in current content, yield only the part before it
+                            if stop_seq in content:
+                                content = content.split(stop_seq)[0]
+                                if content:
+                                    yield content
+                            should_stop = True
+                            break
+                    
+                    if should_stop:
+                        break
+                    
+                    # Early stop check: if we have enough text and multiple complete sentences, stop early
+                    if len(accumulated_text) >= MIN_CHARS_FOR_EARLY_STOP:
+                        text_stripped = accumulated_text.strip()
+                        # Count complete sentences (ending with punctuation)
+                        sentence_count = sum(1 for p in [".", "!", "?", "。", "！", "？"] if text_stripped.count(p) > 0)
+                        # If we have 2+ complete sentences and max_tokens is set to 80 (for 1-2 sentences), stop early
+                        if sentence_count >= 2 and self.max_tokens and self.max_tokens <= 80:
+                            # Check if last sentence is complete
+                            if any(text_stripped.endswith(p) for p in [".", "!", "?", "。", "！", "？"]):
+                                # Check for Korean honorific endings
+                                if any(text_stripped.endswith(ending) for ending in HONORIFIC_ENDINGS):
+                                    logger.debug(f"Early stop: 2+ complete sentences detected, stopping generation")
+                                    yield content
+                                    break
+                    
+                    yield content
 
             # If stream ends while still in a tool call, make sure to yield the tool call
             if in_tool_call and accumulated_tool_calls:

@@ -172,6 +172,7 @@ class BasicMemoryAgent(AgentInterface):
             return
 
         self._memory.append(message_data)
+        logger.debug(f"_add_message: Added {role} message to memory. Total messages: {len(self._memory)}")
 
     def set_memory_from_history(self, conf_uid: str, history_uid: str) -> None:
         """Load memory from chat history."""
@@ -242,6 +243,7 @@ class BasicMemoryAgent(AgentInterface):
     def _to_messages(self, input_data: BatchInput) -> List[Dict[str, Any]]:
         """Prepare messages for LLM API call."""
         messages = self._memory.copy()
+        logger.debug(f"_to_messages: Starting with {len(messages)} messages from memory")
         user_content = []
         text_prompt = self._to_text_prompt(input_data)
         if text_prompt:
@@ -576,6 +578,8 @@ class BasicMemoryAgent(AgentInterface):
             else:
                 if current_turn_text:
                     self._add_message(current_turn_text, "assistant")
+                    # Also add to messages list for next iteration (if any)
+                    messages.append({"role": "assistant", "content": current_turn_text})
                 return
 
     def _chat_function_factory(

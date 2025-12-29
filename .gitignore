@@ -57,9 +57,7 @@ models/*
 !models/piper_voice
 models/piper_voice/*
 
-# Fairy tale models - exclude large model files (over 2GB GitHub LFS limit)
-# Model files should be downloaded separately or hosted externally
-fairy_tale/models/**/*.gguf
+# Fairy tale models - include final models, exclude backups and large intermediate files
 fairy_tale/models/*_backup*/
 fairy_tale/models/*/model-f16.gguf
 fairy_tale/checkpoints/*_backup*/

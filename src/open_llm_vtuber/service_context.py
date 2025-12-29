@@ -455,9 +455,13 @@ class ServiceContext:
             prompt_content = prompt_loader.load_util(prompt_file)
 
             if prompt_name == "live2d_expression_prompt":
-                prompt_content = prompt_content.replace(
-                    "[<insert_emomap_keys>]", self.live2d_model.emo_str
-                )
+                if self.live2d_model:
+                    prompt_content = prompt_content.replace(
+                        "[<insert_emomap_keys>]", self.live2d_model.emo_str
+                    )
+                else:
+                    logger.warning("Live2D model not initialized, skipping live2d_expression_prompt replacement.")
+                    continue
 
             if prompt_name == "mcp_prompt":
                 continue

@@ -1,0 +1,14 @@
+FROM model-q4_0.gguf
+
+# 백설공주 캐릭터 Fine-tuning 모델 (GGUF)
+# Base model: Qwen/Qwen3-4B-Instruct-2507 (merged with LoRA adapters)
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.95
+PARAMETER top_k 40
+PARAMETER num_predict 300
+PARAMETER repeat_penalty 1.1
+PARAMETER repeat_last_n 64
+
+# System prompt는 애플리케이션에서 설정
+# MCP (Model Context Protocol)는 Agent 레벨에서 처리되므로 이 모델과 완전히 호환됩니다

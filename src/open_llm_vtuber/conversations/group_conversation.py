@@ -54,7 +54,7 @@ async def process_group_conversation(
     tts_managers = {uid: TTSTaskManager() for uid in group_members}
 
     try:
-        logger.info(f"Group Conversation Chain {session_emoji} started!")
+        logger.info(f"Group Conversation Chain started!")
 
         # Initialize state with group_id
         state = GroupConversationState(
@@ -136,7 +136,7 @@ async def process_group_conversation(
 
     except asyncio.CancelledError:
         logger.info(
-            f"🤡👍 Group Conversation {session_emoji} cancelled because interrupted."
+            f"Group Conversation cancelled because interrupted."
         )
         raise
     except Exception as e:

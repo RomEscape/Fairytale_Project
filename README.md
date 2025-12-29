@@ -32,41 +32,14 @@ pip install -r requirements.txt
 uv sync
 ```
 
-### 3. 모델 파일 다운로드 및 Ollama 설치
-
-**주의**: 모델 파일(2.4GB)은 GitHub LFS 크기 제한(2GB)으로 인해 저장소에 포함되지 않습니다. HuggingFace에서 다운로드하세요.
+### 3. Ollama 설치 및 모델 등록
 
 ```bash
 # Ollama 설치 (아직 설치하지 않은 경우)
 curl -fsSL https://ollama.com/install.sh | sh
 
-# 모델 디렉토리 생성
-mkdir -p fairy_tale/models/snow_white_gguf
-
-# HuggingFace Hub 설치 및 로그인 (처음만)
-pip install huggingface_hub
-huggingface-cli login  # HuggingFace 토큰 입력
-
-# HuggingFace에서 모델 다운로드
-huggingface-cli download PJiNH/snow_white_gguf model-q4_0.gguf \
-    --local-dir fairy_tale/models/snow_white_gguf/
-
-# 모델 확인: https://huggingface.co/PJiNH/snow_white_gguf
-
-# Modelfile 확인/생성
+# 모델 디렉토리로 이동
 cd fairy_tale/models/snow_white_gguf
-if [ ! -f Modelfile ]; then
-    cat > Modelfile << 'EOF'
-FROM model-q4_0.gguf
-
-PARAMETER temperature 0.7
-PARAMETER top_p 0.95
-PARAMETER top_k 40
-PARAMETER num_predict 300
-PARAMETER repeat_penalty 1.1
-PARAMETER repeat_last_n 64
-EOF
-fi
 
 # Ollama에 모델 등록
 ollama rm snow_white 2>/dev/null || true

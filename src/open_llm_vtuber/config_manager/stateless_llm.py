@@ -94,6 +94,7 @@ class OllamaConfig(OpenAICompatibleConfig):
     """Configuration for Ollama API."""
 
     llm_api_key: str = Field("default_api_key", alias="llm_api_key")
+    max_tokens: int | None = Field(None, alias="max_tokens")
     keep_alive: float = Field(-1, alias="keep_alive")
     unload_at_exit: bool = Field(True, alias="unload_at_exit")
     interrupt_method: Literal["system", "user"] = Field(
@@ -105,6 +106,10 @@ class OllamaConfig(OpenAICompatibleConfig):
         "llm_api_key": Description(
             en="API key for authentication (defaults to 'default_api_key' for Ollama)",
             zh="API 认证密钥 (Ollama 默认为 'default_api_key')",
+        ),
+        "max_tokens": Description(
+            en="Maximum number of tokens to generate. Set to None for no limit.",
+            zh="生成的最大令牌数。设置为 None 表示无限制。",
         ),
         "keep_alive": Description(
             en="Keep the model loaded for this many seconds after the last request. "

@@ -52,7 +52,7 @@ async def process_single_conversation(
     try:
         # Send initial signals
         await send_conversation_start_signals(websocket_send)
-        logger.info(f"New Conversation Chain {session_emoji} started!")
+        logger.info(f"New Conversation Chain started!")
 
         # Process user input
         input_text = await process_user_input(
@@ -162,7 +162,7 @@ async def process_single_conversation(
         return full_response  # Return accumulated full_response
 
     except asyncio.CancelledError:
-        logger.info(f"🤡👍 Conversation {session_emoji} cancelled because interrupted.")
+        logger.info(f"Conversation cancelled because interrupted.")
         raise
     except Exception as e:
         logger.error(f"Error in conversation chain: {e}")

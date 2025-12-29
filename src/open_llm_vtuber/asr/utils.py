@@ -74,12 +74,12 @@ def download_and_extract(url: str, output_dir: str) -> Path:
     # Check if the extracted directory already exists
     if extracted_dir_path.exists():
         logger.info(
-            f"✅ The directory {extracted_dir_path} already exists. I would assume that the model is already downloaded and we are ready to go. Skipping download and extraction."
+            f"The directory {extracted_dir_path} already exists. I would assume that the model is already downloaded and we are ready to go. Skipping download and extraction."
         )
         return extracted_dir_path
 
     # Download the file
-    logger.info(f"🏃‍♂️Downloading {url} to {file_path}...")
+    logger.info(f"Downloading {url} to {file_path}...")
     response = requests.get(url, stream=True)
     response.raise_for_status()  # Raise an error for bad status codes
     total_size = int(response.headers.get("content-length", 0))
@@ -139,7 +139,7 @@ def check_and_extract_local_file(url: str, output_dir: str) -> Path | None:
 
     if extracted_dir.exists():
         logger.info(
-            f"✅ Extracted directory exists: {extracted_dir}, no operation needed."
+            f"Extracted directory exists: {extracted_dir}, no operation needed."
         )
         return extracted_dir
 
