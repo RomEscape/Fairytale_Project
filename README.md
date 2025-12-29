@@ -34,6 +34,8 @@ uv sync
 
 ### 3. HuggingFace에서 모델 다운로드 및 Ollama 등록
 
+**모델은 HuggingFace에서 자동으로 다운로드됩니다:**
+
 ```bash
 # Ollama 설치 (아직 설치하지 않은 경우)
 curl -fsSL https://ollama.com/install.sh | sh
@@ -45,7 +47,8 @@ pip install huggingface-hub
 mkdir -p fairy_tale/models/snow_white_gguf
 cd fairy_tale/models/snow_white_gguf
 
-# HuggingFace에서 모델 다운로드
+# HuggingFace에서 모델 다운로드 (2.37 GB)
+# 모델 페이지: https://huggingface.co/PJiNH/snow_white_gguf
 huggingface-cli download PJiNH/snow_white_gguf model-q4_0.gguf --local-dir .
 
 # Modelfile 생성
@@ -68,7 +71,7 @@ ollama create snow_white -f Modelfile
 ollama list | grep snow_white
 ```
 
-**참고**: 모델은 [HuggingFace](https://huggingface.co/PJiNH/snow_white_gguf)에서 직접 다운로드됩니다 (2.37 GB).
+**모델 정보**: [PJiNH/snow_white_gguf](https://huggingface.co/PJiNH/snow_white_gguf) - GGUF Q4_0 양자화, 2.37 GB
 
 ### 4. VTuber 설정 및 서버 실행
 
