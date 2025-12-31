@@ -66,3 +66,5 @@ uvicorn==0.37.0
     # via open-llm-vtuber (pyproject.toml)
 websocket-client==1.8.0
     # via open-llm-vtuber (pyproject.toml)
+websockets>=10.4
+    # via uvicorn[standard]
